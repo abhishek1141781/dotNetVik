@@ -1,0 +1,720 @@
+
+
+// POST: StudentController/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(Student stud)
+        {
+            try
+            {
+                Student s = new Student { StudId = stud.StudId, Name = stud.Name, Email = stud.Email, City = stud.City};
+                DatabaseOperations.AddStudent(s);
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+***********************************************************************************************************************
+
+
+Database:
+CREATE TABLE [dbo].[Students] (
+    [StudId] INT          NOT NULL,
+    [Name]   VARCHAR (50) NOT NULL,
+    [Email]  VARCHAR (50) NOT NULL,
+    [City]   VARCHAR (50) NOT NULL,
+    PRIMARY KEY CLUSTERED ([StudId] ASC)
+);
+
+
+***************************************		Stored Procedures		*********************************************************
+CREATE PROCEDURE [dbo].deleteStudent
+	@StudId int
+AS
+	delete from Students where StudId=@StudId
+RETURN 0
+
+CREATE PROCEDURE [dbo].insertStudent
+	@StudId int ,
+	@Name varchar(50),
+	@Email varchar(50),
+	@City varchar(50)
+AS
+	Insert into Students values (@StudId,@Name,@Email,@City)
+RETURN 0
+
+CREATE PROCEDURE [dbo].updateStudent
+	@StudId int ,
+	@Name varchar(50),
+	@Email varchar(50),
+	@City varchar(50)
+AS
+	update Students set Name=@Name,Email=@Email,City=@City where StudId=@StudId
+RETURN 0
+***************************************		///Stored Procedures///		*********************************************************
+
+
+
+
+***************************************		Model		*********************************************************
+namespace Practice.Models
+{
+    public class Student
+    {
+        public int StudId { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+    
+        public string City { get; set; }
+    }
+}
+***************************************		///Model///		*********************************************************
+
+
+
+Controllers --- add Controller ---- MVC Controller with read/write actions
+
+Install ----		Microsoft.Data.SqlClient from NPM
+
+
+
+****************************************************************************************************************************
+****************************************************************************************************************************
+****************************************************************************************************************************
+****************************************************************************************************************************
+
+
+
+
+
+
+*************************************************		DataBaseOPeration.cs		***************************************************************************
+
+DataBaseOPeration.cs
+
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
+using WebApplication10.Models;
+
+namespace WebApplication10
+{
+    public class DBConnection
+    {
+        
+        private static SqlConnection Connection()
+        {
+            SqlConnection cn = new SqlConnection();
+            cn.ConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=student;Integrated Security=True;";
+            return cn;
+        }
+        
+        public static List<Student> GetAllStudents()
+        {
+            List<Student> list = new List<Student>();
+
+            SqlConnection cn = Connection();
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.Text;
+            cmd.CommandText = "select * from Students";
+            cn.Open();
+
+            SqlDataReader dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                list.Add(new Student {
+                    StudentId = (int)dr["StudentId"] ,
+                    Name = (String)dr["Name"],
+                    SubjectId = (String)dr["SubjectId"],
+                    City = (String)dr["City"],
+                    Email = (String)dr["Email"],
+                    Password = (String)dr["Password"]
+                });
+            }
+
+            return list;
+            
+        }
+
+        public static Student GetStudent(int id)
+        {
+            Student s = null;
+
+            SqlConnection cn = Connection();
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.Text;
+            cmd.CommandText = "select * from Students where StudentId=@StudentId";
+            cmd.Parameters.AddWithValue("@StudentId", id);
+            cn.Open();
+
+            SqlDataReader dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                 s = new Student
+                {
+                    StudentId = (int)dr["StudentId"],
+                    Name = (String)dr["Name"],
+                     SubjectId = (String)dr["SubjectId"],
+                     City = (String)dr["City"],
+                    Email = (String)dr["Email"],
+                    Password = (String)dr["Password"]
+                };
+            }
+
+            return s;
+        }
+
+        public static void AddStudent(Student student)
+        {
+            SqlConnection cn = Connection();
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.Text;
+            cmd.CommandText = "insert into Students values(@StudentId,@Name,@SubjectId,@City,@Email,@Password)";	
+
+            cmd.Parameters.AddWithValue("@StudentId",student.StudentId);
+            cmd.Parameters.AddWithValue("@Name",student.Name);
+            cmd.Parameters.AddWithValue("@SubjectId",student.SubjectId);
+            cmd.Parameters.AddWithValue("@City",student.City);
+            cmd.Parameters.AddWithValue("@Email",student.Email);
+            cmd.Parameters.AddWithValue("@Password",student.Password);
+
+            cn.Open();
+
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);    
+            }
+            
+        }
+
+
+        public static void EditStudent(Student student)
+        {
+            SqlConnection cn = Connection();
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.Text;
+            cmd.CommandText = "update Students set Name=@Name,SubjectId=@SubjectId,City=@City,Email=@Email,Password=@Password where StudentId=@StudentId";
+
+            cmd.Parameters.AddWithValue("@StudentId", student.StudentId);
+            cmd.Parameters.AddWithValue("@Name", student.Name);
+            cmd.Parameters.AddWithValue("@SubjectId", student.SubjectId);
+            cmd.Parameters.AddWithValue("@City", student.City);
+            cmd.Parameters.AddWithValue("@Email", student.Email);
+            cmd.Parameters.AddWithValue("@Password", student.Password);
+
+            cn.Open();
+
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+        }
+
+
+        public static void DeleteStudent(Student student)
+        {
+            SqlConnection cn = Connection();
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.Text;
+            cmd.CommandText = "Delete from Students where StudentId=@StudentId";
+
+            cmd.Parameters.AddWithValue("@StudentId", student.StudentId);
+ 
+            cn.Open();
+
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+        }
+
+        public static Student GetStudentByEmailAndPassword(StudentLogin sl)
+        {
+            Student s = null;
+
+            SqlConnection cn = Connection();
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.Text;
+            cmd.CommandText = "select * from Students where Email=@Email and Password=@Password";
+            cmd.Parameters.AddWithValue("@Email",sl.Email);
+            cmd.Parameters.AddWithValue("@Password",sl.Password);
+            cn.Open();
+
+            SqlDataReader dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                s = new Student
+                {
+                    StudentId = (int)dr["StudentId"],
+                    Name = (String)dr["Name"],
+                    SubjectId = (String)dr["SubjectId"],
+                    City = (String)dr["City"],
+                    Email = (String)dr["Email"],
+                    Password = (String)dr["Password"]
+                };
+            }
+
+            return s;
+        }
+
+
+
+        //public static List<SelectListItem> GetAllSubjects()
+        //{
+        //    List<SelectListItem> list = new List<SelectListItem>();
+
+        //    SqlConnection cn = Connection();
+        //    SqlCommand cmd = new SqlCommand();
+        //    cmd.Connection = cn;
+        //    cmd.CommandType = System.Data.CommandType.Text;
+        //    cmd.CommandText = "select * from Subject";
+        //    cn.Open();
+
+        //    SqlDataReader dr = cmd.ExecuteReader();
+
+        //    while (dr.Read())
+        //    {
+
+        //        int i  = (int)dr["SubjectId"];
+        //        String s = Convert.ToString(i);
+        //        list.Add(new SelectListItem
+        //        {
+        //            Text = (String)dr["SubjectName"],
+        //            Value = s
+
+        //        });
+        //    }
+
+        //    return list;
+
+        //}
+
+
+        public static List<Subject> GetAllSubjects()
+        {
+            List<Subject> list = new List<Subject>();
+
+            SqlConnection cn = Connection();
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.Text;
+            cmd.CommandText = "select * from Subject";
+            cn.Open();
+
+            SqlDataReader dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                list.Add(new Subject
+                {
+                    SubjectId = (String)dr["SubjectId"],
+                    SubjectName = (String)dr["SubjectName"]
+                });
+                
+            }
+
+            return list;
+
+        }
+
+    }
+}
+
+***********************************************************    Student controller   *************************************************************************
+
+
+
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using WebApplication10.ViewModels;
+using WebApplication10.Models;
+
+namespace WebApplication10.Controllers
+{
+    public class StudentController : Controller
+    {
+        // GET: StudentController
+        public ActionResult Index()
+        {
+
+            return View(DBConnection.GetAllStudents());
+        }
+
+        // GET: StudentController/Details/5
+        public ActionResult Details(int id)
+        {
+            return View(DBConnection.GetStudent(id));
+        }
+
+        // GET: StudentController/Create
+        public ActionResult Create()
+        {
+            StudentViewModel o = new StudentViewModel();
+
+            List<Subject> list = DBConnection.GetAllSubjects();
+
+            List<SelectListItem> list1 = new List<SelectListItem>();
+
+            foreach (var item in list)
+            {
+                list1.Add(new SelectListItem { Text = item.SubjectName, Value = item.SubjectId });
+            }
+
+            o.Subjects = list1;
+
+            return View(o);
+        }
+
+        // POST: StudentController/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(StudentViewModel st)
+        {
+            try
+            {
+                Student s = new Student { StudentId=st.StudentId ,SubjectId=st.SubjectId, Name=st.Name, City=st.City, Email=st.Email,Password=st.Password};
+                DBConnection.AddStudent(s);
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: StudentController/Edit/5
+        public ActionResult Edit(int id)
+        {
+            return View();
+        }
+
+        // POST: StudentController/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(int id, IFormCollection collection)
+        {
+            try
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: StudentController/Delete/5
+        public ActionResult Delete(int id)
+        {
+            return View();
+        }
+
+        // POST: StudentController/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id, IFormCollection collection)
+        {
+            try
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+********************************************************DbCOnnection(ya to ye ya phir iske upar wala dekh lo)*********************************************************
+using Microsoft.Data.SqlClient;
+using WebApplication8.Models;
+
+namespace WebApplication8
+{
+    public class DBConnection
+    {
+        
+
+        private static SqlConnection connection()
+        {
+            SqlConnection cn = new SqlConnection("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=emp;Integrated Security=True;");
+            return cn;
+        }
+        public static void Insert(Employee emp)
+        {
+            SqlConnection cn = connection();
+            cn.Open();
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType= System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "insertEmployee";
+
+            cmd.Parameters.AddWithValue("@EmpId", emp.EmpId);
+            cmd.Parameters.AddWithValue("@FirstName", emp.FirstName);
+            cmd.Parameters.AddWithValue("@Email", emp.Email);
+            cmd.Parameters.AddWithValue("@Salary", emp.Salary);
+
+
+            try
+            {
+                int n = cmd.ExecuteNonQuery();
+                Console.WriteLine(n);
+            }
+            catch(Exception ex) 
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                cn.Close();
+                cn.Dispose();
+            }
+
+
+        }
+
+        public static void Update(Employee emp)
+        {
+            SqlConnection cn = connection();
+            cn.Open();
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "updateEmployee";
+
+            cmd.Parameters.AddWithValue("@EmpId", emp.EmpId);
+            cmd.Parameters.AddWithValue("@FirstName", emp.FirstName);
+            cmd.Parameters.AddWithValue("@Email", emp.Email);
+            cmd.Parameters.AddWithValue("@Salary", emp.Salary);
+
+
+            try
+            {
+                int n = cmd.ExecuteNonQuery();
+                Console.WriteLine(n);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                cn.Close();
+                cn.Dispose();
+            }
+        }
+
+        public static void Delete(int EmpId)
+        {
+            SqlConnection cn = connection();
+            cn.Open();
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "deleteEmployee";
+
+            cmd.Parameters.AddWithValue("@EmpId",EmpId);
+            
+            try
+            {
+                int n = cmd.ExecuteNonQuery();
+                Console.WriteLine(n);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                cn.Close();
+                cn.Dispose();
+            }
+        }
+
+        public static List<Employee> GetAll()
+        {
+            SqlConnection cn = connection();
+            cn.Open ();
+
+            List<Employee> list = new List<Employee>();
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.Text;
+            cmd.CommandText = "select * from Employees";
+
+            try
+            {
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    list.Add(new Employee()
+                    {
+                        EmpId = (int)reader["EmpId"],
+                        FirstName = (String)reader["FirstName"],
+                        Email = (String)reader["Email"],
+                        Salary = (decimal)reader["Salary"]
+
+                    }) ;
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                cn.Close();
+                cn.Dispose();
+            }
+            return list;
+        }
+
+        public static Employee GetSingleEmployee(int id)
+        {
+            SqlConnection cn = connection();
+            cn.Open();
+
+            Employee emp = null;
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.Text;
+            cmd.CommandText = "select * from Employees where EmpId=@EmpId";
+
+            cmd.Parameters.AddWithValue("@EmpID", id);
+
+            try
+            {
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    emp = new Employee()
+                    {
+                        EmpId = (int)reader["EmpId"],
+                        FirstName = (String)reader["FirstName"],
+                        Email = (String)reader["Email"],
+                        Salary = (decimal)reader["Salary"]
+
+                    };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                cn.Close();
+                cn.Dispose();
+            }
+            return emp;
+        }
+
+
+        public static Employee GetSingleEmployeeWithNameAndEnmail(User u)
+        {
+            SqlConnection cn = connection();
+            cn.Open();
+
+            Employee emp = null;
+
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cn;
+            cmd.CommandType = System.Data.CommandType.Text;
+            cmd.CommandText = "select * from Employees where Email=@Email and FirstName=@FirstName";
+
+            cmd.Parameters.AddWithValue("@Email", u.Email);
+            cmd.Parameters.AddWithValue("@FirstName", u.Password);
+
+            try
+            {
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    emp = new Employee()
+                    {
+                        EmpId = (int)reader["EmpId"],
+                        FirstName = (String)reader["FirstName"],
+                        Email = (String)reader["Email"],
+                        Salary = (decimal)reader["Salary"]
+
+                    };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                cn.Close();
+                cn.Dispose();
+            }
+            return emp;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
