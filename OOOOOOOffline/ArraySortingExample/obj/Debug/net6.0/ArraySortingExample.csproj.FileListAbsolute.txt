@@ -1,0 +1,15 @@
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\bin\Debug\net6.0\ArraySortingExample.exe
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\bin\Debug\net6.0\ArraySortingExample.deps.json
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\bin\Debug\net6.0\ArraySortingExample.runtimeconfig.json
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\bin\Debug\net6.0\ArraySortingExample.dll
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\bin\Debug\net6.0\ArraySortingExample.pdb
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\obj\Debug\net6.0\ArraySortingExample.csproj.AssemblyReference.cache
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\obj\Debug\net6.0\ArraySortingExample.GeneratedMSBuildEditorConfig.editorconfig
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\obj\Debug\net6.0\ArraySortingExample.AssemblyInfoInputs.cache
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\obj\Debug\net6.0\ArraySortingExample.AssemblyInfo.cs
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\obj\Debug\net6.0\ArraySortingExample.csproj.CoreCompileInputs.cache
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\obj\Debug\net6.0\ArraySortingExample.dll
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\obj\Debug\net6.0\refint\ArraySortingExample.dll
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\obj\Debug\net6.0\ArraySortingExample.pdb
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\obj\Debug\net6.0\ArraySortingExample.genruntimeconfig.cache
+D:\Trainings\ActsDec22\Day6\ArraySortingExample\obj\Debug\net6.0\ref\ArraySortingExample.dll

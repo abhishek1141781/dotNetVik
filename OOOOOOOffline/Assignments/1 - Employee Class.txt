@@ -1,0 +1,13 @@
+Create a Class Employee with the following specifications
+
+
+Properties
+----------
+string Name -> no blank names should be allowed
+int EmpNo -> must be greater than 0
+decimal Basic -> must be between some range
+short DeptNo -> must be > 0
+
+Methods
+-------
+decimal GetNetSalary() -> returns calculated net salary (Use any formula to get net salary based on Basic salary)
